@@ -47,6 +47,7 @@
 (global-visual-line-mode t)
 (setq-default show-trailing-whitespace t)
 (setq ring-bell-function 'ignore)
+(tool-bar-mode -1)
 
 ;; File types.
 (setq auto-mode-alist (append '(("\\.cu$" . c-mode))
