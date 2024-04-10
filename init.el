@@ -20,7 +20,7 @@
   (unless (package-installed-p package)
     (package-install package)))
 
-(standard-display-ascii ?\t "--->")
+(standard-display-ascii ?\t "--->") ; show tabs
 
 (setq frame-title-format
       (concat "%b - emacs@" (system-name)))
@@ -38,9 +38,9 @@
 
 (global-auto-revert-mode 1)
 (setq inhibit-splash-screen t)
-(setq diff-switches "-u")
 (setq inhibit-default-init t)
 (setq indent-tabs-mode nil)
+(setq-default indent-tabs-mode nil)
 (setq column-number-mode t)
 (setq make-backup-files nil)
 (setq-default word-wrap t)
@@ -56,17 +56,16 @@
 ;; (setq auto-mode-alist (append '(("\\.glsl$" . c-mode))
 ;;                               auto-mode-alist))
 
+;; syntax highlighting
 (when (fboundp 'global-font-lock-mode)
   (global-font-lock-mode t))
 
 (defvar c-default-style '((other . "stroustrup")))
 
-(setq-default indent-tabs-mode nil)
-
 ;; Packages.
 (require 'clang-format)
 (add-hook 'after-init-hook #'global-flycheck-mode)
-(add-hook 'after-init-hook 'global-company-mode)
+(add-hook 'after-init-hook #'global-company-mode)
 
 ;; Themes
 (load-theme 'inkpot t)
