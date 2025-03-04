@@ -3,72 +3,70 @@
 ;;; Simple Emacs init file.  Goes in ~/.emacs.d/
 ;;; Code:
 
+;; Initialize package management
 (require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("gnu" . "https://elpa.gnu.org/packages/")
+                         ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
 (package-initialize)
 
-(defvar package-list '(clang-format
-                       company
-                       flycheck
-                       glsl-mode
-                       inkpot-theme))
+;; Bootstrap use-package if not installed
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
 
-(unless package-archive-contents
-  (package-refresh-contents))
+(require 'use-package)
+(setq use-package-always-ensure t)
 
-(dolist (package package-list)
-  (unless (package-installed-p package)
-    (package-install package)))
+;; Install and configure packages
+(use-package flycheck
+  :hook (after-init . global-flycheck-mode))
 
-(standard-display-ascii ?\t "--->") ; show tabs
+(use-package company
+  :hook (after-init . global-company-mode))
 
-(setq frame-title-format
-      (concat "%b - emacs@" (system-name)))
+(use-package clang-format
+  :bind ("<f8>" . clang-format-region))
 
-;; Spellcheck in text and latex mode.
-(dolist (hook '(text-mode-hook))
-  (add-hook hook (lambda () (flyspell-mode 1))))
-(dolist (hook '(latex-mode-hook))
-  (add-hook hook (lambda () (flyspell-mode 1))))
+(use-package rust-mode)
+(use-package cargo-mode)
+(use-package flycheck-rust)
+(use-package racket-mode)
+(use-package slime)
 
-;; Define special keys.
+(load-theme 'leuven-dark t)
+
+;; UI Tweaks
+(setq inhibit-splash-screen t
+      inhibit-default-init t
+      frame-title-format (concat "%b - emacs@" (system-name))
+      column-number-mode t
+      ring-bell-function 'ignore
+      make-backup-files nil
+      indent-tabs-mode nil
+      show-trailing-whitespace t
+      word-wrap t)
+
+(tool-bar-mode -1)
+(global-auto-revert-mode 1)
+(global-visual-line-mode t)
+
+;; Tab visualization
+(standard-display-ascii ?\t "--->")
+
+;; Spellcheck in text and LaTeX mode
+(dolist (hook '(text-mode-hook latex-mode-hook))
+  (add-hook hook #'flyspell-mode))
+
+;; Keybindings
 (global-set-key (kbd "<f6>") 'compile)
 (global-set-key (kbd "<f7>") 'delete-trailing-whitespace)
-(global-set-key (kbd "<f8>") 'clang-format-region)
 
-(global-auto-revert-mode 1)
-(setq inhibit-splash-screen t)
-(setq inhibit-default-init t)
-(setq indent-tabs-mode nil)
-(setq-default indent-tabs-mode nil)
-(setq column-number-mode t)
-(setq make-backup-files nil)
-(setq-default word-wrap t)
-(global-visual-line-mode t)
-(setq-default show-trailing-whitespace t)
-(setq ring-bell-function 'ignore)
-(tool-bar-mode -1)
+;; File associations
+(add-to-list 'auto-mode-alist '("\\.cu\\'" . c-mode))
 
-;; File types.
-(setq auto-mode-alist (append '(("\\.cu$" . c-mode))
-                              auto-mode-alist))
+;; Syntax highlighting
+(global-font-lock-mode 1)
 
-;; (setq auto-mode-alist (append '(("\\.glsl$" . c-mode))
-;;                               auto-mode-alist))
-
-;; syntax highlighting
-(when (fboundp 'global-font-lock-mode)
-  (global-font-lock-mode t))
-
-(defvar c-default-style '((other . "stroustrup")))
-
-;; Packages.
-(require 'clang-format)
-(add-hook 'after-init-hook #'global-flycheck-mode)
-(add-hook 'after-init-hook #'global-company-mode)
-
-;; Themes
-(load-theme 'inkpot t)
-
-(provide 'init)
-;;; init.el ends here
+;; C style
+(setq c-default-style '((other . "stroustrup")))
